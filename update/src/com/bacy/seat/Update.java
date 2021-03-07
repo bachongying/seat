@@ -7,10 +7,7 @@ import com.google.gson.JsonObject;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -45,6 +42,11 @@ public class Update {
         frame.add(label);
         frame.add(bar);
         frame.setVisible(true);
+        try{
+            Thread.sleep(Long.valueOf(args[1]));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         Thread thread1 = new Thread(){
             @Override
@@ -65,6 +67,8 @@ public class Update {
             JsonObject object = iterator.next().getAsJsonObject();
             String url = object.get("url").getAsString();
             String path = object.get("path").getAsString();
+            File file = new File(path);
+            file.getParentFile().mkdirs();
             System.out.println(url+"   "+path);
             DownLoadThread thread = new DownLoadThread(url,path,bar);
             thread.start();
@@ -73,6 +77,7 @@ public class Update {
             }
             var++;
         }
+        label.setText("请重启软件,软件将自动退出");
         try {
             Thread.sleep(2000);
         }catch (Exception e){
