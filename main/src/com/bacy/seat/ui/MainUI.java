@@ -1,27 +1,18 @@
 package com.bacy.seat.ui;
 
 import com.bacy.seat.RandomSeat;
-import com.bacy.seat.model.Group;
-import com.bacy.seat.model.Model;
-import com.bacy.seat.model.Seat;
-import com.bacy.seat.people.People;
-import com.bacy.seat.people.Person;
-import com.bacy.seat.util.HeiMu;
 import com.bacy.seat.util.Util;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Random;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class MainUI {
     public static void showUI(){
-        Util.log("初始化主界面...");
+        Util.log("Loading MainUI...");
         JFrame frame = new JFrame("座位抽取机 " + RandomSeat.ver);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(null);
@@ -58,11 +49,24 @@ public class MainUI {
             @Override
             public void actionPerformed(ActionEvent event) {
                 try{
-                    start(box.isSelected(),box1.isSelected(),box2.isSelected());
+                    //frame.dispose();
+                    ArrangeUI.showNormalUI(box.isSelected(),box1.isSelected(),box2.isSelected());
                 }catch (Exception e){
                     e.printStackTrace();
-                    JOptionPane.showMessageDialog(null,"错误\r\n错误原因:"+e.toString(),"ERROR",JOptionPane.ERROR_MESSAGE);
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    e.printStackTrace(pw);
+                    JOptionPane.showMessageDialog(null,"错误\r\n错误原因:"+sw.toString(),"ERROR",JOptionPane.ERROR_MESSAGE);
                 }
+            }
+        });
+        panel1.add(button);
+        button = new JButton("稳定性测试");
+        button.setBounds(170,40,110,25);
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                ArrangeUI.debug(box.isSelected(),box1.isSelected(),box2.isSelected());
             }
         });
         panel1.add(button);
@@ -72,134 +76,5 @@ public class MainUI {
         frame.add(panel1);
 
         frame.setVisible(true);
-    }
-
-    public static void start(boolean sex,boolean mark,boolean savemark) throws Exception{
-        Util.log("初始化抽取");
-        Random random = new Random(System.currentTimeMillis());
-        for(Group group:Model.groups){
-            for(Seat seat:group.getSeats()){
-                seat.setPerson(null,false);
-            }
-        }
-        for(Person person: People.people){
-            person.setSeat(null,false);
-        }
-        HeiMu.setPeopleWithHeiMu(random);
-        Util.log("开始抽取");
-        if(sex){
-            Util.log("正在分类性别");
-            ArrayList<Person> male = new ArrayList<>();
-            ArrayList<Person> female = new ArrayList<>();
-            for(Person person: People.people){
-                if(person.isMale()){
-                    male.add(person);
-                }else {
-                    female.add(person);
-                }
-            }
-            ArrayList<Person> more;
-            ArrayList<Person> fewer;
-            boolean fewerSexIsMale = false;
-            if(female.size()>male.size()){
-                fewer=male;
-                fewerSexIsMale=true;
-                more=female;
-            }else{
-                fewer=female;
-                fewerSexIsMale=false;
-                more=male;
-            }
-            float allleft=fewer.size()+more.size();
-            float fewerleft=fewer.size();
-            Collections.shuffle(Model.groups);
-            for(Group group:Model.groups){
-                int count = Math.round(fewerleft/allleft*group.getSeats().size());
-                group.setFewerSexCount(count);
-                allleft-=group.getSeats().size();
-                fewerleft-=count;
-            }
-            int count = 0;
-            boolean front = true;
-            Iterator<Person> iterator = fewer.iterator();
-            while (iterator.hasNext()){
-                if(iterator.next().hasHeiMu())iterator.remove();
-            }
-            iterator = more.iterator();
-            while (iterator.hasNext()){
-                if(iterator.next().hasHeiMu())iterator.remove();
-            }
-            if(!mark){
-                Collections.shuffle(fewer);
-                Collections.shuffle(more);
-            }
-            while (fewer.size()>0){
-                Collections.shuffle(Model.groups);
-                for(Group group:Model.groups){
-                    if(group.needFewerSex(fewerSexIsMale)&&fewer.size()>0){
-                        Person person = front?fewer.get(0):fewer.get(fewer.size()-1);
-                        Util.log(person.toString()+"分配至"+group+"-"+group.putPerson(person,true,random,mark));
-                        fewer.remove(person);
-                    }
-                }
-                front=!front;
-                count++;
-                if(count>100)throw new Exception("请重试");
-            }
-            count=0;
-            front=true;
-            while (more.size()>0){
-                Collections.shuffle(Model.groups);
-                for(Group group:Model.groups){
-                    if(group.getUnUsedSeats().size()>0 && more.size()>0){
-                        Person person = front?more.get(0):more.get(more.size()-1);
-                        Util.log(person.toString()+"分配至"+group);
-                        if(group.putPerson(person,false,random,mark)){
-                            more.remove(person);
-                            Util.log("成功");
-                        }
-                    }
-                }
-                front=!front;
-                count++;
-                if(count>100)throw new Exception("请重试");
-            }
-        }else{
-            ArrayList<Person> people = new ArrayList<>();
-            people.addAll(People.people);
-            Iterator<Person> iterator = people.iterator();
-            while (iterator.hasNext()) {
-                if(iterator.next().hasHeiMu())iterator.remove();
-            }
-            int count=0;
-            boolean front=true;
-            while (people.size()>0){
-                Collections.shuffle(Model.groups);
-                for(Group group:Model.groups){
-                    if(group.getUnUsedSeats().size()>0 && people.size()>0){
-                        Person person = front?people.get(0):people.get(people.size()-1);
-                        Util.log(person.toString()+"分配至"+group);
-                        if(group.putPerson(person,false,random,mark)){
-                            people.remove(person);
-                            Util.log("成功");
-                        }
-                    }
-                }
-                front=!front;
-                count++;
-                if(count>100)throw new Exception("请重试");
-            }
-        }
-        for(Group group:Model.groups){
-            for(Seat seat:group.getSeats()){
-                seat.getCell().setCellValue((savemark?seat.getPerson().getCount():"")+seat.getPerson().getName());
-            }
-        }
-        FileOutputStream outputStream = new FileOutputStream("座位表.xlsx");
-        Model.workbook.write(outputStream);
-        outputStream.flush();
-        outputStream.close();
-        Util.log("成功");
-        JOptionPane.showMessageDialog(null,"成功抽取,已保存至'座位表.xlsx'","SUCCESS",JOptionPane.INFORMATION_MESSAGE);
     }
 }

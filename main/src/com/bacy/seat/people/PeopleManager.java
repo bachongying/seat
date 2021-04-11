@@ -1,6 +1,5 @@
 package com.bacy.seat.people;
 
-import com.bacy.seat.util.HeiMu;
 import com.bacy.seat.util.Util;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -9,9 +8,23 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class People {
-    public static ArrayList<Person> people;
-    public static void loadPeople() throws Exception{
+public class PeopleManager {
+    private static ArrayList<Person> people = new ArrayList<>();
+
+    public static ArrayList<Person> getPeople() {
+        return people;
+    }
+
+    public static Person getPerson(String name){
+        for(Person person:people){
+            if(person.getName().equalsIgnoreCase(name)){
+                return person;
+            }
+        }
+        return null;
+    }
+
+    public static void initPeople() throws Exception{
         people=new ArrayList<>();
         XSSFWorkbook workbook = new XSSFWorkbook("名单.xlsx");
         XSSFSheet sheet = workbook.getSheetAt(0);//读取表格数据
@@ -28,14 +41,9 @@ public class People {
             }else{
                 person = new Person(Util.getValue(row.getCell(0)),random.nextBoolean(),a+1);
             }
-            Util.log("读入"+person);
+            Util.log("Read "+person);
             people.add(person);
         }
-        HeiMu.setPeopleHeiMu();
-        for(int a = 0;a<people.size()/2;a++){
-            people.get(a).setMarkGood(true);
-        }
-        HeiMu.setAllHeiMuPerson(people);
         workbook.close();
     }
 }

@@ -1,75 +1,77 @@
 package com.bacy.seat.people;
 
-import com.bacy.seat.model.Seat;
-import com.bacy.seat.util.HeiMu;
+import com.bacy.seat.group.MarkGroup;
+import com.bacy.seat.group.Seat;
+import com.bacy.seat.group.SeatGroup;
+import com.bacy.seat.util.heimu.AbstractHeiMu;
 
 import java.util.ArrayList;
 
 public class Person {
     private String name;
-    private boolean male;
+    private boolean isMale;
     private int count;
-    private boolean markGood = false;
-
-    private ArrayList<HeiMu> heiMus = new ArrayList<>();
+    private MarkGroup markGroup;
+    private ArrayList<AbstractHeiMu> heiMus;
     private Seat seat;
-
-    public Person(String name, boolean male, int count) {
+    private SeatGroup group;
+    public Person(String name, boolean isMale, int count){
         this.name = name;
-        this.male = male;
+        this.isMale = isMale;
         this.count = count;
+        this.heiMus = new ArrayList<>();
     }
 
-    public boolean isMarkGood() {
-        return markGood;
+    public void setMarkGroup(MarkGroup markGroup) {
+        this.markGroup = markGroup;
     }
 
-    public void setMarkGood(boolean markGood) {
-        this.markGood = markGood;
+    public MarkGroup getMarkGroup() {
+        return markGroup;
     }
 
-    public boolean hasHeiMu() {
-        return heiMus.size()>0;
-    }
-
-    public void addHeiMu(HeiMu heiMu){
-        this.heiMus.add(heiMu);
-    }
-
-    public ArrayList<HeiMu> getHeiMus() {
-        return heiMus;
-    }
-
-    public void setSeat(Seat seat,boolean saveToSeat) {
+    public void setSeat(Seat seat) {
         this.seat = seat;
-        if(saveToSeat)this.seat.setPerson(this,false);
     }
 
-    public boolean hasSeat(){
-        return this.seat!=null;
+    public Seat getSeat() {
+        return seat;
     }
 
-    public Seat getSeat(){
-        return this.seat;
+    public void setGroup(SeatGroup group) {
+        this.group = group;
+    }
+
+    public SeatGroup getGroup() {
+        return group;
     }
 
     public String getName() {
         return name;
     }
 
-    public boolean isMale() {
-        return male;
-    }
-
     public int getCount() {
         return count;
     }
 
+    public boolean isMale() {
+        return isMale;
+    }
+
+    public ArrayList<AbstractHeiMu> getHeiMus() {
+        return heiMus;
+    }
+
+    public void addHeiMu(AbstractHeiMu heiMu){
+        this.heiMus.add(heiMu);
+    }
+
     @Override
     public String toString() {
-        return "{" +
-                "姓名 " + name +
-                ",性别 " + (male?"男":"女") +
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", isMale=" + isMale +
+                ", count=" + count +
                 '}';
     }
 }

@@ -1,1 +1,1 @@
-自动更新需要把各种包包括main和update和lib下的jar放到新建文件夹jars中,并在其父文件夹运行main.jar
+黑幕格式见代码，需要保存base64格式至/jars/downloadinfo.json下的data的jsonarray中，使用云端黑幕启动器参数添加cloud或者在所在文件夹内放一个名为cloud的空白文件
