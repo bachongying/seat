@@ -1,5 +1,6 @@
 package com.bacy.seat.util;
 
+import com.bacy.seat.RandomSeat;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -10,9 +11,12 @@ import java.util.*;
 public class Util {
     public static XSSFWorkbook workbook = null;
     public static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+    public static boolean showLog = true;
     public static void log(Object o){
-        Date date = new Date();
-        System.out.println("["+df.format(date)+"] "+ o.toString());
+        if(showLog&& RandomSeat.showLog){
+            Date date = new Date();
+            System.out.println("["+df.format(date)+"] "+ o.toString());
+        }
     }
     public static String getValue(XSSFCell xssfCell){
         if(xssfCell==null)return "";

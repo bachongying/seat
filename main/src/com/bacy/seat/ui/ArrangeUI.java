@@ -43,7 +43,7 @@ public class ArrangeUI {
         bar1.setBounds(10,100,260,20);
         frame.add(bar1);
 
-        ArrangeThread thread = new ArrangeThread(sex,mark,true,saveCount);
+        ArrangeThread thread = new ArrangeThread(sex,mark,false,saveCount);
         thread.start();
         new Thread(){
             @Override
@@ -95,7 +95,8 @@ public class ArrangeUI {
         int times = 1000;
         bar.setMaximum(times);
         long time = System.currentTimeMillis();
-        DebugThread thread = new DebugThread(times,sex,mark,false,saveCount);
+        DebugThread thread = new DebugThread(times,sex,mark,saveCount);
+        Util.showLog=false;
         thread.start();
         new Thread(){
             @Override
@@ -107,6 +108,7 @@ public class ArrangeUI {
                 }
                 JOptionPane.showMessageDialog(null,"错误次数:"+thread.errorTimes+"/10000\r\n时间:"+(System.currentTimeMillis()-time),"ERROR",JOptionPane.ERROR_MESSAGE);
                 frame.dispose();
+                Util.showLog=true;
             }
         }.start();
     }
@@ -117,13 +119,11 @@ public class ArrangeUI {
         private int max;
         private boolean sex;
         private boolean mark;
-        private boolean save;
         private boolean saveCount;
-        public DebugThread(int max, boolean sex, boolean mark, boolean save, boolean saveCount) {
+        public DebugThread(int max, boolean sex, boolean mark, boolean saveCount) {
             this.max = max;
             this.sex = sex;
             this.mark = mark;
-            this.save = save;
             this.saveCount = saveCount;
         }
 
@@ -131,7 +131,7 @@ public class ArrangeUI {
         public void run() {
             for(int a=0;a<max;a++){
                 count=a;
-                ArrangeThread thread = new ArrangeThread(sex,mark,false,saveCount);
+                ArrangeThread thread = new ArrangeThread(sex,mark,true,saveCount);
                 thread.start();
                 while (thread.isAlive()){
                 }
@@ -143,49 +143,54 @@ public class ArrangeUI {
     public static class ArrangeThread extends Thread{
         private boolean sex;
         private boolean mark;
-        private boolean save;
+        private boolean debug;
         private boolean saveCount;
         public int bar1,bar2;
         public int bar2Max;
         public String lable1,lable2;
         public Exception e;
-        public ArrangeThread(boolean sex, boolean mark, boolean save, boolean saveCount){
+        public ArrangeThread(boolean sex, boolean mark, boolean debug, boolean saveCount){
             this.sex = sex;
             this.mark = mark;
-            this.save = save;
+            this.debug = debug;
             this.saveCount = saveCount;
+        }
+        public void setValue(int bar1,int bar2,int bar2Max,String lable1,String lable2,int delay){
+            if(!debug){
+                this.bar1 = bar1;
+                this.bar2 = bar2;
+                this.bar2Max = bar2Max;
+                this.lable1 = lable1;
+                this.lable2 = lable2;
+                try {
+                    Thread.sleep(delay);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
         }
         @Override
         public void run(){
             try{
                 //reset
-                bar1=1;
-                lable1="重置数据...";
-                Random random = new Random();
                 Util.log("Reset");
-                bar2Max=SeatGroupManager.getGroups().size();
-                bar2=0;
-                lable2="重置座位组...";
+                this.setValue(1,bar2,bar2Max,"重置数据...",lable2,50);
+                Random random = new Random();
+                this.setValue(bar1,0,SeatGroupManager.getGroups().size(),lable1,"重置座位组...",5);
                 for(SeatGroup seatGroup: SeatGroupManager.getGroups()) {
                     seatGroup.reset();
-                    bar2++;
+                    this.setValue(bar1,bar2+1,bar2Max,lable1,lable2,5);
                 }
-                bar2Max=PeopleManager.getPeople().size();
-                bar2=0;
-                lable2="重置人...";
+                this.setValue(bar1,0,PeopleManager.getPeople().size(),lable1,"重置人...",5);
                 for(Person person:PeopleManager.getPeople()) {
                     person.setSeat(null);
                     person.setGroup(null);
-                    bar2++;
+                    this.setValue(bar1,bar2+1,bar2Max,lable1,lable2,2);
                 }
 
                 //先分配成绩组
-                bar1=2;
-                lable1="初始化成绩组...";
-                bar2=0;
-                bar2Max=1;
-                lable2="...";
                 Util.log("Arranging markGroup");
+                this.setValue(2,0,1,"初始化成绩组...", "...",50);
                 ArrayList<MarkGroup> markGroups = new ArrayList<>();
                 boolean flag = true;
                 int count = 0;
@@ -207,16 +212,13 @@ public class ArrangeUI {
                 }
 
                 //打乱数组
-                bar1=3;
-                lable1="初始化分配成绩组...";
                 Util.log("Shuffle List");
+                this.setValue(3,bar2,bar2Max,"初始化分配成绩组...","打乱中...",100);
                 markGroups = Util.ShuffleList(markGroups);
 
                 //安排各组人
-                bar1=4;
-                lable1="分配各个人到成绩组...";
-                bar2Max=markGroups.size();
                 Util.log("Arranging markGroup's people");
+                this.setValue(4,bar2,markGroups.size(),"分配各个人到成绩组...","...(0/"+markGroups.size()+")",50);
                 if(mark) {
                     Iterator<MarkGroup> iterator = markGroups.iterator();
                     MarkGroup markGroup = iterator.next();
@@ -227,18 +229,16 @@ public class ArrangeUI {
                         markGroup.addPerson(person);
                         person.setMarkGroup(markGroup);
                     }
-                    bar2++;
+                    this.setValue(bar1,bar2+1,bar2Max,lable1,"...("+(bar2+1)+"/"+bar2Max+")",10);
                 }
                 //安排黑幕
                 HeiMuManager.arrangeHeiMu(mark);
 
-                bar1=5;
-                lable1="分配各个人到座位组...";
-                bar2=0;
-                bar2Max=1;
+                Util.log("Start arranging");
+                this.setValue(5,0,1,"分配各个人到座位组...",lable2,50);
                 if(sex && mark) {
                     //先排人少的组，从这个组的成绩组中拿人
-                    lable2="打乱数组";
+                    this.setValue(bar1,bar2,bar2Max,lable1,"打乱数组",20);
                     ArrayList<SeatGroup> groups = SeatGroupManager.getGroups();
                     groups = Util.ShuffleList(groups);
             /*groups.sort(new Comparator<SeatGroup>() {
@@ -247,8 +247,7 @@ public class ArrangeUI {
                     return o1.getEmptySeatSize()-o2.getEmptySeatSize();
                 }
             });*/
-                    lable2="计算男女人数";
-                    bar2Max=PeopleManager.getPeople().size();
+                    this.setValue(bar1,bar2,PeopleManager.getPeople().size(),lable1,"计算男女人数",5);
                     int peopleLeft = 0;
                     int maleLeft = 0;
                     for (Person person : PeopleManager.getPeople()) {
@@ -257,11 +256,9 @@ public class ArrangeUI {
                         if (person.isMale()) {
                             maleLeft++;
                         }
-                        bar2++;
+                        this.setValue(bar1,bar2+1,bar2Max,lable1,lable2,1);
                     }
-                    lable2="分配各座位组的人...";
-                    bar2Max=groups.size();
-                    bar2=0;
+                    this.setValue(bar1,0,groups.size(),lable1,"分配各座位组的人...(0/"+groups.size()+")",5);
                     for (SeatGroup group : groups) {
                         ArrayList<MarkGroup> accessibleGroup = new ArrayList<>();
                         for (MarkGroup markGroup : markGroups) {
@@ -330,12 +327,10 @@ public class ArrangeUI {
                     }*/
                         }
                         Util.log(group + " has " + maleUse + " male people");
-                        bar2++;
+                        this.setValue(bar1,bar2+1,bar2Max,lable1,"分配各座位组的人...("+(bar2+1)+"/"+groups.size()+")",100);
                     }
                 }else if(mark){
-                    lable2="分配各成绩组的人...";
-                    bar2Max=markGroups.size();
-                    bar2=0;
+                    this.setValue(bar1,0,markGroups.size(),lable1,"分配各成绩组的人到座位...(0/"+markGroups.size()+")",5);
                     for (MarkGroup markGroup1 : markGroups) {
                         for (Person person : markGroup1.getPeople()) {
                             SeatGroup group = Util.getRandomElement(person.getMarkGroup().getAccessableGroup(), random);
@@ -343,21 +338,17 @@ public class ArrangeUI {
                             person.setGroup(group);
                             person.getMarkGroup().removeAccessableGroup(group);
                         }
-                        bar2++;
+                        this.setValue(bar1,bar2+1,bar2Max,lable1,"分配各成绩组的人到座位...("+(bar2+1)+"/"+markGroups.size()+")",25);
                     }
                 }else if(sex){
                     //安排男女人数
-                    lable2="分配男女人数...";
-                    bar2Max=PeopleManager.getPeople().size();
-                    bar2=0;
+                    this.setValue(bar1,0,PeopleManager.getPeople().size(),lable1,"分配男女人数...",5);
                     int male = 0;
                     for(Person person:PeopleManager.getPeople()){
                         if(person.isMale()){
                             male++;
                         }
-                        bar2++;
                     }
-                    bar2=0;
                     ArrayList<SeatGroup> groups = Util.ShuffleList(SeatGroupManager.getGroups());
                     int left = PeopleManager.getPeople().size();
                     int maleLeft = male;
@@ -366,13 +357,11 @@ public class ArrangeUI {
                         group.setMale(var);
                         left -= group.getEmptySeatSize();
                         maleLeft -= var;
+                        this.setValue(bar1,bar2+1,bar2Max,lable1,lable2,5);
                     }
-                    bar2=0;
-                    bar2Max=PeopleManager.getPeople().size();
-                    lable2="安排男生...";
+                    this.setValue(bar1,0,PeopleManager.getPeople().size(),lable1,"安排男生...("+bar2+"/"+bar2Max+")",5);
                     //安排男生
                     for(Person person:PeopleManager.getPeople()){
-                        bar2++;
                         if(!person.isMale())continue;
                         if(person.getGroup()!=null)continue;
                         ArrayList<SeatGroup> accessableGroup = new ArrayList<>();
@@ -385,13 +374,11 @@ public class ArrangeUI {
                         group.addPerson(person);
                         person.setGroup(group);
                         maleLeft--;
+                        this.setValue(bar1,bar2+1,bar2Max,lable1,"安排男生...("+(bar2+1)+"/"+bar2Max+")",25);
                     }
-                    bar2=0;
-                    bar2Max=PeopleManager.getPeople().size();
-                    lable2="安排女生...";
+                    this.setValue(bar1,bar2,bar2Max,lable1,"安排女生...("+bar2+"/"+bar2Max+")",5);
                     //安排女生
                     for(Person person:PeopleManager.getPeople()){
-                        bar2++;
                         if(person.isMale())continue;
                         if(person.getGroup()!=null)continue;
                         ArrayList<SeatGroup> accessableGroup = new ArrayList<>();
@@ -403,13 +390,11 @@ public class ArrangeUI {
                         SeatGroup group = Util.getRandomElement(accessableGroup, random);
                         group.addPerson(person);
                         person.setGroup(group);
+                        this.setValue(bar1,bar2+1,bar2Max,lable1,"安排女生...("+(bar2+1)+"/"+bar2Max+")",25);
                     }
                 }else{
-                    lable2="分配...";
-                    bar2Max=PeopleManager.getPeople().size();
-                    bar2=0;
+                    this.setValue(bar1,0,PeopleManager.getPeople().size(),lable1,"分配...(0/"+PeopleManager.getPeople().size()+")",5);
                     for(Person person:PeopleManager.getPeople()){
-                        bar2++;
                         if(person.getGroup()!=null)continue;
                         ArrayList<SeatGroup> accessableGroup = new ArrayList<>();
                         for(SeatGroup group:SeatGroupManager.getGroups()){
@@ -420,24 +405,20 @@ public class ArrangeUI {
                         SeatGroup group = Util.getRandomElement(accessableGroup, random);
                         group.addPerson(person);
                         person.setGroup(group);
+                        this.setValue(bar1,bar2+1,bar2Max,lable1,"分配...("+(bar2+1)+"/"+PeopleManager.getPeople().size()+")",10);
                     }
                 }
 
-                bar1=6;
-                bar2=0;
-                bar2Max=SeatGroupManager.getGroups().size();
-                lable1="分配各组的座位...";
-                lable2="...";
+                Util.log("Arranging group seats");
+                this.setValue(6,0,SeatGroupManager.getGroups().size(),"分配各组的座位...","...0/"+SeatGroupManager.getGroups().size(),5);
                 for(SeatGroup group:SeatGroupManager.getGroups()) {
                     group.arrangeSeat(sex, saveCount, random);
-                    bar2++;
+                    this.setValue(bar1,bar2+1,bar2Max,lable1,"..."+(bar2+1)+"/"+bar2Max,75);
                 }
 
-                bar1=7;
-                bar2=0;
-                bar2Max=1;
-                lable1="保存...";
-                if(save) {
+                Util.log("Saving");
+                this.setValue(7,0,1,"保存...","...",5);
+                if(!debug) {
                     //保存
                     SimpleDateFormat df = new SimpleDateFormat("HH-mm-ss-SSS");
                     Date date = new Date();
@@ -446,8 +427,8 @@ public class ArrangeUI {
                     Util.workbook.write(outputStream);
                     outputStream.flush();
                     outputStream.close();
-                    bar1=8;
-                    bar2=1;
+                    Util.log("Success");
+                    this.setValue(8,1,bar2Max,"完成...","...",5);
                     JOptionPane.showMessageDialog(null,"已保存至\'"+fileName+"\'","成功",JOptionPane.INFORMATION_MESSAGE);
                 }
             }catch (Exception e){

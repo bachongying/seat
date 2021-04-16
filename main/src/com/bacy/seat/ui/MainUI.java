@@ -44,7 +44,7 @@ public class MainUI {
         panel1.setBounds(0,100,280,55);
         panel1.setLayout(null);
         JButton button = new JButton("开始抽取");
-        button.setBounds(170,0,110,25);
+        button.setBounds(120,RandomSeat.debug?0:30,160,25);
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
@@ -61,18 +61,31 @@ public class MainUI {
             }
         });
         panel1.add(button);
-        button = new JButton("稳定性测试");
-        button.setBounds(170,40,110,25);
+        button = new JButton("test");
+        button.setBounds(120,30,80,25);
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
                 ArrangeUI.debug(box.isSelected(),box1.isSelected(),box2.isSelected());
             }
         });
-        panel1.add(button);
+        if(RandomSeat.debug) panel1.add(button);
+        button = new JButton("reload");
+        button.setBounds(200,30,80,25);
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                frame.dispose();
+                MainUI.showUI();
+            }
+        });
+        if(RandomSeat.debug) panel1.add(button);
         JLabel label1 = new JLabel("Made by 勿忘落樱");
         label1.setBounds(10,30,280,25);
         panel1.add(label1);
+        label1 = new JLabel("DEBUG MODE");
+        label1.setBounds(10,5,280,25);
+        if(RandomSeat.debug) panel1.add(label1);
         frame.add(panel1);
 
         frame.setVisible(true);

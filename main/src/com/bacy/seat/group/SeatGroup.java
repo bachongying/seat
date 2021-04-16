@@ -75,21 +75,14 @@ public class SeatGroup {
             for(Person person:people) {
                 if (person.getSeat() != null) continue;
                 if (!person.isMale()) continue;
-                boolean flag = false;
-                ArrayList<Seat> seats = this.getEmptySeat();
-                while(seats.size()>0){
-                    Seat seat = Util.getRandomElement(seats,random);
-                    if(!this.deskMateHasMalePerson(seat)){
-                        flag=true;
-                        this.setPersonToSeat(person,seat,saveCount);
-                        break;
-                    }
-                    seats.remove(seat);
+                ArrayList<Seat> seats = this.getEmptyOrNoMaleDeskMateSeats();
+                Seat seat;
+                if(seats.size()>0){
+                    seat = Util.getRandomElement(seats,random);
+                }else{
+                    seat = Util.getRandomElement(this.getEmptySeat(),random);
                 }
-                if(!flag){
-                    Seat seat=Util.getRandomElement(this.getEmptySeat(),random);
-                    this.setPersonToSeat(person,seat,saveCount);
-                }
+                this.setPersonToSeat(person,seat,saveCount);
             }
             //女生
             for(Person person:people) {
@@ -104,6 +97,16 @@ public class SeatGroup {
                 this.setPersonToSeat(person,seat,saveCount);
             }
         }
+    }
+
+    private ArrayList<Seat> getEmptyOrNoMaleDeskMateSeats(){
+        ArrayList<Seat> var = this.getEmptySeat();
+        Iterator<Seat> iterator = var.iterator();
+        while (iterator.hasNext()){
+            Seat seat = iterator.next();
+            if(this.hasDeskMateAndDeskMateHasMalePerson(seat))iterator.remove();
+        }
+        return var;
     }
 
     private void setPersonToSeat(Person person, Seat seat, boolean saveCount){
@@ -130,16 +133,9 @@ public class SeatGroup {
         return seats;
     }
 
-    private boolean deskMateHasMalePerson(Seat seat){
+    private boolean hasDeskMateAndDeskMateHasMalePerson(Seat seat){
         for(Seat seat1:getDeskMate(seat)){
             if(!seat1.isEmpty()&&seat1.getPerson().isMale()) return true;
-        }
-        return false;
-    }
-
-    private boolean deskMateHasPerson(Seat seat){
-        for(Seat seat1:getDeskMate(seat)){
-            if(!seat1.isEmpty()) return true;
         }
         return false;
     }
