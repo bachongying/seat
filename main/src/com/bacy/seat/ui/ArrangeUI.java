@@ -135,7 +135,10 @@ public class ArrangeUI {
                 thread.start();
                 while (thread.isAlive()){
                 }
-                if(thread.e!=null)errorTimes++;
+                if(thread.e!=null){
+                    errorTimes++;
+                    thread.e.printStackTrace();
+                }
             }
         }
     }

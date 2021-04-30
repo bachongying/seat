@@ -55,7 +55,7 @@ public class SeatGroup {
                         while (deskMate==null){
                             seat= Util.getRandomElement(this.getEmptySeat(),random);
                             deskMate= Util.getRandomElement(getDeskMate(seat),random);
-                            if(!deskMate.isEmpty()){
+                            if(deskMate!=null && !deskMate.isEmpty()){
                                 deskMate=null;
                             }
                             var++;
