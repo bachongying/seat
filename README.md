@@ -1,4 +1,5 @@
 # 快速入门  
+第零步:下载[jar](https://github.com/bachongying/seat/raw/main/download/jre.zip)包和[main](https://github.com/bachongying/seat/releases/latest)包,
 第一步:打开'*座位模板*',编辑其中你要安排的座位并保存  
 编辑方法:如果本单元格需要安排座位,则输入小组的编号(不同小组不能重复,重复视为同一小组，可以使用任意字符),否则不能输入任何内容包含单元格格式改变,参考初始内容  
 第二步:打开'*学生名单*',编辑其中你要安排座位的学生  
