@@ -18,13 +18,7 @@ public class LoadingUI {
         frame.setLayout(null);
         frame.setResizable(false);
         frame.setSize(220,120);
-        int windowWidth = frame.getWidth();
-        int windowHeight = frame.getHeight();
-        Toolkit kit = Toolkit.getDefaultToolkit();
-        Dimension screenSize = kit.getScreenSize();
-        int screenWidth = screenSize.width;
-        int screenHeight = screenSize.height;
-        frame.setLocation(screenWidth/2-windowWidth/2, screenHeight/2-windowHeight/2);
+        Util.centerFrame(frame);
         JLabel label = new JLabel("加载名单...");
         label.setBounds(10,10,180,20);
         frame.add(label);
@@ -71,11 +65,6 @@ public class LoadingUI {
         label.setText("完成...");
         bar.setValue(2);
         frame.repaint();
-        try{
-            Thread.sleep(1000);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
         frame.dispose();
         MainUI.showUI();
     }

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class PeopleManager {
-    private static ArrayList<Person> people = new ArrayList<>();
+    private static ArrayList<Person> people;
 
     public static ArrayList<Person> getPeople() {
         return people;
@@ -41,9 +41,10 @@ public class PeopleManager {
             }else{
                 person = new Person(Util.getValue(row.getCell(0)),random.nextBoolean(),a+1);
             }
-            Util.log("Read "+person);
+            //Util.log("Read "+person);
             people.add(person);
         }
+        Util.log("读入"+people.size()+"条数据");
         workbook.close();
     }
 }

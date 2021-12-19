@@ -5,8 +5,11 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import javax.swing.*;
+import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 public class Util {
     public static XSSFWorkbook workbook = null;
@@ -17,6 +20,15 @@ public class Util {
             Date date = new Date();
             System.out.println("["+df.format(date)+"] "+ o.toString());
         }
+    }
+    public static void centerFrame(JFrame frame){
+        int windowWidth = frame.getWidth();
+        int windowHeight = frame.getHeight();
+        Toolkit kit = Toolkit.getDefaultToolkit();
+        Dimension screenSize = kit.getScreenSize();
+        int screenWidth = screenSize.width;
+        int screenHeight = screenSize.height;
+        frame.setLocation(screenWidth/2-windowWidth/2, screenHeight/2-windowHeight/2);
     }
     public static String getValue(XSSFCell xssfCell){
         if(xssfCell==null)return "";

@@ -6,10 +6,6 @@ import com.google.gson.JsonObject;
 
 public abstract class AbstractSinglePerson extends AbstractHeiMu{
     protected Person person;
-    public AbstractSinglePerson(int probability, Person person) {
-        super(probability);
-        this.person = person;
-    }
     public AbstractSinglePerson(){
         super();
     }

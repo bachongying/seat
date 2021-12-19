@@ -14,10 +14,6 @@ public class SetGroup extends AbstractSinglePerson {
     //need data   probability:0-100,person:name,groups:groupIDs split with ','
     //etc. {"className":"SetGroup","probability":100,"person":"张三","groups":"1,2,3"}
     private List<String> groups;
-    public SetGroup(int probability, Person person, List<String> groups) {
-        super(probability, person);
-        this.groups = groups;
-    }
     public SetGroup(){
         super();
     }
@@ -37,6 +33,11 @@ public class SetGroup extends AbstractSinglePerson {
     public void readData(JsonObject object) {
         super.readData(object);
         this.groups= Arrays.asList(object.get("groups").getAsString().split(","));
+    }
+
+    @Override
+    public String getDefaultJson() {
+        return "{\"className\":\"SetGroup\",\"probability\":0-100,\"person\":\"人名\",\"groups\":\"组ID数列,逗号分割\"}";
     }
 
     @Override

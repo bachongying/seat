@@ -8,11 +8,10 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public abstract class AbstractHeiMu {
+    private JsonObject object = null;
+
     /*0-100*/
     protected int probability;
-    public AbstractHeiMu(int probability){
-        this.probability=probability;
-    }
     public AbstractHeiMu(){}
 
     public void readData(JsonObject object){
@@ -21,6 +20,11 @@ public abstract class AbstractHeiMu {
         }else{
             this.probability=100;
         }
+        this.object=object;
+    }
+
+    public JsonObject getJson() {
+        return object;
     }
 
     private boolean useful = true;
@@ -36,4 +40,5 @@ public abstract class AbstractHeiMu {
     public abstract boolean isAvailable();
     public abstract ArrayList<SeatGroup> getMatchGroups(boolean mark);
     public abstract void putToPerson();
+    public abstract String getDefaultJson();
 }

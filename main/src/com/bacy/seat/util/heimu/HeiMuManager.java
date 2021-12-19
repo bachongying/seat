@@ -14,11 +14,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.io.File;
 import java.io.FileReader;
+import java.io.PrintWriter;
 import java.util.*;
 
 public class HeiMuManager {
-    private static ArrayList<AbstractHeiMu> heiMus = new ArrayList<>();
+    public static ArrayList<AbstractHeiMu> heiMus;
+    public static Class[] classes = {DeskMate.class,DifferentGroup.class,SameGroup.class,SetGroup.class};
 
     /*example json at jars/downloadinfo.json
     {"data":[base64code,base64code]}
@@ -27,6 +30,7 @@ public class HeiMuManager {
 
     public static void initHeiMu() throws Exception{
         Gson gson = new Gson();
+        heiMus = new ArrayList<>();
         JsonObject var = gson.fromJson(new FileReader("./jars/downloadinfo.json"),JsonObject.class);
         Iterator<JsonElement> iterator = var.get("data").getAsJsonArray().iterator();
         while (iterator.hasNext()){
@@ -44,6 +48,29 @@ public class HeiMuManager {
                 e.printStackTrace();
             }
         }
+    }
+    public static void removeHeiMu(AbstractHeiMu heiMu){
+        heiMus.remove(heiMu);
+    }
+    public static void addHeiMu(AbstractHeiMu heiMu){
+        heiMus.add(heiMu);
+    }
+    public static void saveHeiMu() throws Exception{
+        File file = new File("./jars/downloadinfo.json");
+        Gson gson = new Gson();
+        JsonObject jsonObject = gson.fromJson(new FileReader(file),JsonObject.class);
+        JsonArray array = new JsonArray();
+        for(AbstractHeiMu heiMu:heiMus){
+            String var = heiMu.getJson().toString();
+            var = Util.EncodeBase64(var);
+            array.add(var);
+        }
+        jsonObject.add("data",array);
+
+        PrintWriter printWriter = new PrintWriter(file);
+        printWriter.println(gson.toJson(jsonObject));
+        printWriter.flush();
+        printWriter.close();
     }
     public static void arrangeHeiMu(boolean mark){
         ArrayList<Person> people = new ArrayList<>();
@@ -85,12 +112,16 @@ public class HeiMuManager {
                 accessableGroup=seatGroups;
             }
             for(AbstractHeiMu heiMu:heiMus){
-                if(!heiMu.isUseful())continue;
+                if(!heiMu.isUseful()){
+                    Util.log("not use         "+heiMu.toString());
+                    continue;
+                }
                 ArrayList<SeatGroup> temp = Util.getIntersection(heiMu.getMatchGroups(mark),accessableGroup);
                 if(temp.size()>0){
                     accessableGroup=temp;
+                    Util.log("arrange success "+heiMu);
                 }else{
-                    Util.log(heiMu+"not use");
+                    Util.log("arrange failed  "+heiMu);
                 }
             }
             if(accessableGroup.size()>0){

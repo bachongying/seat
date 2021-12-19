@@ -13,9 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SeatGroupManager {
-    private static ArrayList<SeatGroup> groups = new ArrayList<>();
+    private static ArrayList<SeatGroup> groups;
     public static void initSeatGroup() throws Exception{
         Map<String,SeatGroup> model = new HashMap<>();
+        groups = new ArrayList<>();
         XSSFWorkbook workbook = Util.workbook = new XSSFWorkbook("座位模板.xlsx");
         XSSFSheet sheet = workbook.getSheetAt(0);//读取表格数据
         int count = 0;
@@ -29,7 +30,7 @@ public class SeatGroupManager {
                 if(model.containsKey(groupID)){
                     SeatGroup group = model.get(groupID);
                     Seat seat = new Seat(cell, group);
-                    Util.log("Read "+seat+" GroupID="+groupID);
+                    //Util.log("Read "+seat+" GroupID="+groupID);
                     group.addSeat(seat);
                     count++;
                 }else {
@@ -42,6 +43,7 @@ public class SeatGroupManager {
                 }
             }
         }
+        Util.log("读入"+groups.size()+"个组,共"+count+"个座位");
 
         if(count!= PeopleManager.getPeople().size()){
             throw new Exception("座位数("+count+")与人数("+PeopleManager.getPeople().size()+")不符");

@@ -11,9 +11,6 @@ import java.util.ArrayList;
 public class SameGroup extends AbstractTwoPeopleHeiMu {
     //need data   probability:0-100,personA:name,personB:name
     //etc. {"className":"SameGroup","probability":100,"personA":"张三","personB":"李四"}
-    public SameGroup(int probability, Person personA, Person personB) {
-        super(probability, personA, personB);
-    }
     public SameGroup(){
         super();
     }
@@ -33,6 +30,11 @@ public class SameGroup extends AbstractTwoPeopleHeiMu {
             }
         }
         return temp;
+    }
+
+    @Override
+    public String getDefaultJson() {
+        return "{\"className\":\"SameGroup\",\"probability\":0-100,\"personA\":\"人1\",\"personB\":\"人2\"}";
     }
 
     @Override

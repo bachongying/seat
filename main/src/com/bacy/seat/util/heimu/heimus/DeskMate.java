@@ -29,6 +29,11 @@ public class DeskMate extends SameGroup{
     }
 
     @Override
+    public String getDefaultJson() {
+        return "{\"className\":\"DeskMate\",\"probability\":0-100,\"personA\":\"人1\",\"personB\":\"人2\"}";
+    }
+
+    @Override
     public String toString() {
         return "DeskMate{" +
                 "probability=" + probability +

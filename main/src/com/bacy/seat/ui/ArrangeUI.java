@@ -1,5 +1,6 @@
 package com.bacy.seat.ui;
 
+import com.bacy.seat.RandomSeat;
 import com.bacy.seat.group.MarkGroup;
 import com.bacy.seat.group.SeatGroup;
 import com.bacy.seat.group.SeatGroupManager;
@@ -23,13 +24,7 @@ public class ArrangeUI {
         frame.setLayout(null);
         frame.setResizable(false);
         frame.setSize(300,180);
-        int windowWidth = frame.getWidth();
-        int windowHeight = frame.getHeight();
-        Toolkit kit = Toolkit.getDefaultToolkit();
-        Dimension screenSize = kit.getScreenSize();
-        int screenWidth = screenSize.width;
-        int screenHeight = screenSize.height;
-        frame.setLocation(screenWidth/2-windowWidth/2, screenHeight/2-windowHeight/2);
+        Util.centerFrame(frame);
         JLabel label = new JLabel("准备中...");
         label.setBounds(10,10,260,20);
         frame.add(label);
@@ -165,18 +160,21 @@ public class ArrangeUI {
                 this.bar2Max = bar2Max;
                 this.lable1 = lable1;
                 this.lable2 = lable2;
-                try {
-                    Thread.sleep(delay);
-                }catch (Exception e){
-                    e.printStackTrace();
+                if(!RandomSeat.debug){
+                    try {
+                        //Thread.sleep(delay);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
                 }
             }
         }
         @Override
         public void run(){
             try{
+                long startTime = System.currentTimeMillis();
                 //reset
-                Util.log("Reset");
+                Util.log("重置数据");
                 this.setValue(1,bar2,bar2Max,"重置数据...",lable2,50);
                 Random random = new Random();
                 this.setValue(bar1,0,SeatGroupManager.getGroups().size(),lable1,"重置座位组...",5);
@@ -192,7 +190,7 @@ public class ArrangeUI {
                 }
 
                 //先分配成绩组
-                Util.log("Arranging markGroup");
+                Util.log("初始化成绩组");
                 this.setValue(2,0,1,"初始化成绩组...", "...",50);
                 ArrayList<MarkGroup> markGroups = new ArrayList<>();
                 boolean flag = true;
@@ -209,18 +207,18 @@ public class ArrangeUI {
                     }
                     if (accessableGroup.size() > 0) {
                         markGroups.add(new MarkGroup(count, accessableGroup.size(), accessableGroup));
-                        Util.log("New markGroup(count=" + count + ", accessableGroup=" + accessableGroup + ")");
                     }
                     count++;
                 }
+                Util.log("Done. " + markGroups.size()+"个");
 
                 //打乱数组
-                Util.log("Shuffle List");
+                Util.log("打乱成绩组顺序");
                 this.setValue(3,bar2,bar2Max,"初始化分配成绩组...","打乱中...",100);
                 markGroups = Util.ShuffleList(markGroups);
 
                 //安排各组人
-                Util.log("Arranging markGroup's people");
+                Util.log("开始分配各个人到成绩组");
                 this.setValue(4,bar2,markGroups.size(),"分配各个人到成绩组...","...(0/"+markGroups.size()+")",50);
                 if(mark) {
                     Iterator<MarkGroup> iterator = markGroups.iterator();
@@ -237,7 +235,7 @@ public class ArrangeUI {
                 //安排黑幕
                 HeiMuManager.arrangeHeiMu(mark);
 
-                Util.log("Start arranging");
+                Util.log("开始分配各个人到座位组");
                 this.setValue(5,0,1,"分配各个人到座位组...",lable2,50);
                 if(sex && mark) {
                     //先排人少的组，从这个组的成绩组中拿人
@@ -262,6 +260,12 @@ public class ArrangeUI {
                         this.setValue(bar1,bar2+1,bar2Max,lable1,lable2,1);
                     }
                     this.setValue(bar1,0,groups.size(),lable1,"分配各座位组的人...(0/"+groups.size()+")",5);
+                    groups.sort(new Comparator<SeatGroup>() {
+                        @Override
+                        public int compare(SeatGroup o1, SeatGroup o2) {
+                            return o1.getEmptySeatSize()-o2.getEmptySeatSize();
+                        }
+                    });
                     for (SeatGroup group : groups) {
                         ArrayList<MarkGroup> accessibleGroup = new ArrayList<>();
                         for (MarkGroup markGroup : markGroups) {
@@ -270,7 +274,7 @@ public class ArrangeUI {
                         //获取大约男性别人数
                         int maleRange = Math.round((float) maleLeft / (float) peopleLeft * (float) group.getEmptySeatSize());
                         int maleUse = 0;
-                        Util.log(group+" may has " + maleRange + " male people");
+                        //Util.log(group+" may has " + maleRange + " male people");
                         //先拿只有一个性别的组
                         Iterator<MarkGroup> iterator = accessibleGroup.iterator();
                         while (iterator.hasNext()) {
@@ -329,7 +333,8 @@ public class ArrangeUI {
                         }
                     }*/
                         }
-                        Util.log(group + " has " + maleUse + " male people");
+                        //Util.log(group + " has " + maleUse + " male people");
+                        Util.log(group + " done.");
                         this.setValue(bar1,bar2+1,bar2Max,lable1,"分配各座位组的人...("+(bar2+1)+"/"+groups.size()+")",100);
                     }
                 }else if(mark){
@@ -412,28 +417,31 @@ public class ArrangeUI {
                     }
                 }
 
-                Util.log("Arranging group seats");
+                Util.log("安排各组具体座位");
                 this.setValue(6,0,SeatGroupManager.getGroups().size(),"分配各组的座位...","...0/"+SeatGroupManager.getGroups().size(),5);
                 for(SeatGroup group:SeatGroupManager.getGroups()) {
                     group.arrangeSeat(sex, saveCount, random);
+                    Util.log(group + " done.");
                     this.setValue(bar1,bar2+1,bar2Max,lable1,"..."+(bar2+1)+"/"+bar2Max,75);
                 }
 
-                Util.log("Saving");
-                this.setValue(7,0,1,"保存...","...",5);
+                //Util.log("Saving");
+                this.setValue(7,0,1,"加载预览...","...",5);
                 if(!debug) {
                     //保存
-                    SimpleDateFormat df = new SimpleDateFormat("HH-mm-ss-SSS");
-                    Date date = new Date();
-                    String fileName;
-                    FileOutputStream outputStream = new FileOutputStream(fileName="座位表" + "[" + df.format(date) + "]" + ".xlsx");
-                    Util.workbook.write(outputStream);
-                    outputStream.flush();
-                    outputStream.close();
-                    Util.log("Success");
-                    this.setValue(8,1,bar2Max,"完成...","...",5);
-                    JOptionPane.showMessageDialog(null,"已保存至\'"+fileName+"\'","成功",JOptionPane.INFORMATION_MESSAGE);
+                    PreviewUI.showUI(sex,mark,saveCount);
+//                    SimpleDateFormat df = new SimpleDateFormat("HH-mm-ss-SSS");
+//                    Date date = new Date();
+//                    String fileName;
+//                    FileOutputStream outputStream = new FileOutputStream(fileName="座位表" + "[" + df.format(date) + "]" + ".xlsx");
+//                    Util.workbook.write(outputStream);
+//                    outputStream.flush();
+//                    outputStream.close();
+//                    Util.log("Success");
+//                    this.setValue(8,1,bar2Max,"完成...","...",5);
+//                    JOptionPane.showMessageDialog(null,"已保存至\'"+fileName+"\'","成功",JOptionPane.INFORMATION_MESSAGE);
                 }
+                Util.log("完成，耗时"+(System.currentTimeMillis()-startTime)+"ms");
             }catch (Exception e){
                 this.e=e;
             }

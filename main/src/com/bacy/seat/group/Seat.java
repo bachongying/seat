@@ -37,7 +37,7 @@ public class Seat {
     public String toString() {
         return "Seat{" +
                 "person=" + person +
-                ", location=(" + cell.getRowIndex()+","+cell.getColumnIndex() + ")" +
+                ", location=(row=" + cell.getRowIndex()+",col="+cell.getColumnIndex() + ")" +
                 '}';
     }
 }

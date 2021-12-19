@@ -11,9 +11,6 @@ import java.util.ArrayList;
 public class DifferentGroup extends AbstractTwoPeopleHeiMu {
     //need data   probability:0-100,personA:name,personB:name
     //etc. {"className":"DifferentGroup","probability":100,"personA":"张三","personB":"李四"}
-    public DifferentGroup(int probability, Person personA, Person personB) {
-        super(probability, personA, personB);
-    }
     public DifferentGroup(){
         super();
     }
@@ -35,6 +32,11 @@ public class DifferentGroup extends AbstractTwoPeopleHeiMu {
             }
         }
         return temp;
+    }
+
+    @Override
+    public String getDefaultJson() {
+        return "{\"className\":\"DifferentGroup\",\"probability\":0-100,\"personA\":\"人1\",\"personB\":\"人2\"}";
     }
 
     @Override

@@ -11,20 +11,16 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 public class MainUI {
+    public static JFrame frame;
+    private static JCheckBox box,box1,box2;
     public static void showUI(){
         Util.log("Loading MainUI...");
-        JFrame frame = new JFrame("座位抽取机 " + RandomSeat.ver);
+        frame = new JFrame("座位抽取机 " + RandomSeat.ver);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(null);
         frame.setResizable(false);
         frame.setSize(300,200);
-        int windowWidth = frame.getWidth();
-        int windowHeight = frame.getHeight();
-        Toolkit kit = Toolkit.getDefaultToolkit();
-        Dimension screenSize = kit.getScreenSize();
-        int screenWidth = screenSize.width;
-        int screenHeight = screenSize.height;
-        frame.setLocation(screenWidth/2-windowWidth/2, screenHeight/2-windowHeight/2);
+        Util.centerFrame(frame);
 
         JPanel panel = new JPanel();
         panel.setBounds(0,0,280,100);
@@ -32,11 +28,11 @@ public class MainUI {
 
         JLabel label = new JLabel("设置:");
         panel.add(label);
-        JCheckBox box = new JCheckBox("按照男女比例抽取",true);
+        box = new JCheckBox("按照男女比例抽取",true);
         panel.add(box);
-        JCheckBox box1 = new JCheckBox("按照成绩抽取",true);
+        box1 = new JCheckBox("按照成绩抽取",true);
         panel.add(box1);
-        JCheckBox box2 = new JCheckBox("保存成绩");
+        box2 = new JCheckBox("保存成绩");
         panel.add(box2);
         frame.add(panel);
 
@@ -61,22 +57,12 @@ public class MainUI {
             }
         });
         panel1.add(button);
-        button = new JButton("test");
-        button.setBounds(120,30,80,25);
+        button = new JButton("调试工具");
+        button.setBounds(120,30,160,25);
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                ArrangeUI.debug(box.isSelected(),box1.isSelected(),box2.isSelected());
-            }
-        });
-        if(RandomSeat.debug) panel1.add(button);
-        button = new JButton("reload");
-        button.setBounds(200,30,80,25);
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                frame.dispose();
-                MainUI.showUI();
+                test();
             }
         });
         if(RandomSeat.debug) panel1.add(button);
@@ -89,5 +75,32 @@ public class MainUI {
         frame.add(panel1);
 
         frame.setVisible(true);
+    }
+
+    public static void reloadUI(){
+        frame.dispose();
+        MainUI.showUI();
+    }
+
+    public static void test(){
+        int var = JOptionPane.showOptionDialog(null,"选择需要的工具,可以使用命令,具体请输入help查看","select",JOptionPane.DEFAULT_OPTION,JOptionPane.INFORMATION_MESSAGE,null,new String[]{"测试稳定性/速度","测试预览界面","重新加载主界面","重新加载软件","黑幕管理界面"},"测试稳定性/速度");
+        switch (var){
+            case 0:
+                ArrangeUI.debug(box.isSelected(),box1.isSelected(),box2.isSelected());
+                break;
+            case 1:
+                PreviewUI.showUI(false,false,false);
+                break;
+            case 4:
+                HeiMuManagerUI.showUI();
+                break;
+            case 3:
+                frame.dispose();
+                LoadingUI.showUI();
+                break;
+            case 2:
+                reloadUI();
+                break;
+        }
     }
 }
